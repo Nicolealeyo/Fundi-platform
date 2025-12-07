@@ -21,7 +21,7 @@ A fully functional Django-based web application for booking home services (plumb
 - Customers and fundis can view all their bookings
 
 ✅ **Payment & Tracking**
-- Payment integration support (ready for Stripe/M-Pesa integration)
+- Payment integration support (M-Pesa integration)
 - Track payment status
 - View booking history and payment history
 
@@ -136,9 +136,7 @@ Project/
 
 The platform is ready for payment gateway integration. Currently, payments are marked as "completed" automatically. To integrate with real payment providers:
 
-1. **Stripe**: Update `STRIPE_PUBLISHABLE_KEY` and `STRIPE_SECRET_KEY` in settings.py
-2. **M-Pesa**: Add M-Pesa API integration in the payment view
-3. **Other**: Modify `create_payment` view in `services/views.py`
+1. **M-Pesa**: Add M-Pesa API integration in the payment view
 
 ## Future Enhancements
 
