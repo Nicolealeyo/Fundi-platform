@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - All Bookings{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        transition: all 0.4s ease;
+    }
+    .filter-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(102, 126, 234, 0.2);
+    }
+    .table {
+        font-size: 0.95rem;
+    }
+    .table th {
+        white-space: nowrap;
+        text-align: left;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    
+    /* Fix Status column width - Status is 7th column */
+    .table th:nth-child(7),
+    .table td:nth-child(7) {
+        min-width: 140px !important;
+        width: 140px !important;
+        max-width: 140px !important;
+        white-space: nowrap !important;
+    }
+    
+    /* Ensure Status badge is fully visible */
+    .table td:nth-child(7) .badge {
+        white-space: nowrap !important;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    /* Ensure table-responsive doesn't cut off columns */
+    .table-responsive {
+        overflow-x: visible;
+    }
+    
+    @media (max-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-calendar-check"></i> All Bookings</h1>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">Back to Dashboard</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-card">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Search by customer, fundi, service..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Fundi</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th style="min-width: 140px !important; width: 140px !important; max-width: 140px !important;">Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in page_obj %}
+                        <tr>
+                            <td>#{{ booking.id }}</td>
+                            <td>{{ booking.customer.username }}</td>
+                            <td>{{ booking.fundi.user.username }}</td>
+                            <td>{{ booking.service.name }}</td>
+                            <td>{{ booking.booking_date|date:"M d, Y H:i" }}</td>
+                            <td>KSh {{ booking.total_cost }}</td>
+                            <td style="min-width: 140px !important; width: 140px !important; max-width: 140px !important; white-space: nowrap !important;">
+                                <span class="badge bg-{% if booking.status == 'completed' %}success{% elif booking.status == 'pending' %}warning{% elif booking.status == 'cancelled' %}danger{% else %}info{% endif %}" style="white-space: nowrap !important; padding: 0.5rem 0.75rem; font-size: 0.85rem; display: inline-block; width: 100%;">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_booking_detail' booking.id %}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                                <a href="{% url 'admin_booking_detail' booking.id %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'admin_delete_booking' booking.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="8" class="text-center">No bookings found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

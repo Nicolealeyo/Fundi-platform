@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Fundi Dashboard - Fundi Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        transition: all 0.4s ease;
+        border: none;
+    }
+    .card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    }
+    .card h3 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .count-up {
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Fundi Dashboard</h1>
+        <a href="{% url 'edit_fundi_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="count-up">{{ total_bookings }}</h3>
+                    <p class="text-muted">Total Bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="count-up">{{ completed_bookings }}</h3>
+                    <p class="text-muted">Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="count-up">{{ pending_bookings }}</h3>
+                    <p class="text-muted">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="count-up">{{ fundi.average_rating|floatformat:1 }}</h3>
+                    <p class="text-muted">Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h4>Recent Bookings</h4>
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.customer.get_full_name|default:booking.customer.username }}</td>
+                            <td>{{ booking.service.name }}</td>
+                            <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if booking.status == 'completed' %}bg-success
+                                    {% elif booking.status == 'cancelled' %}bg-danger
+                                    {% elif booking.status == 'in_progress' %}bg-warning
+                                    {% elif booking.status == 'confirmed' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'booking_detail' booking.id %}" class="btn btn-sm btn-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No bookings yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Count-up animation function
+    function animateCountUp(element, target, duration = 2000, prefix = '', suffix = '', isDecimal = false) {
+        const start = 0;
+        const increment = target / (duration / 16); // 60fps
+        let current = start;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            
+            if (isDecimal) {
+                element.textContent = current.toFixed(1);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+        }, 16);
+    }
+    
+    // Initialize count-up animations when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for slide-in animations to complete
+        setTimeout(() => {
+            // Find all count-up elements (h3 with count-up class)
+            const countUpElements = document.querySelectorAll('h3.count-up');
+            
+            countUpElements.forEach((element, index) => {
+                const text = element.textContent.trim();
+                let target, isDecimal = false;
+                
+                // Check if it's a decimal (rating)
+                if (text.includes('.')) {
+                    target = parseFloat(text);
+                    isDecimal = true;
+                }
+                // Regular integer
+                else {
+                    target = parseInt(text.replace(/[^\d]/g, '')) || 0;
+                }
+                
+                // Clear the element and start animation
+                element.textContent = isDecimal ? '0.0' : '0';
+                
+                // Start count-up with delay for stagger effect
+                setTimeout(() => {
+                    animateCountUp(element, target, 2000, '', '', isDecimal);
+                }, 300 + (index * 150));
+            });
+        }, 800); // Wait for slide animations
+    });
+</script>
+{% endblock %}
+
+
+
+
+
+

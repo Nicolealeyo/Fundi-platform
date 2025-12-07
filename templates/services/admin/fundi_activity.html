@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - Fundi Activity{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-activity"></i> Fundi Activity & Registration</h1>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">Back to Dashboard</a>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body">
+                    <h3>{{ total_fundis }}</h3>
+                    <p>Total Fundis</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                <div class="card-body">
+                    <h3>{{ recent_registrations.count }}</h3>
+                    <p>Registered (Last 30 Days)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="card-body">
+                    <h3>{{ recent_logins.count }}</h3>
+                    <p>Active (Last 30 Days)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Fundis -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="bi bi-people"></i> All Fundis</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Category</th>
+                            <th>Registered</th>
+                            <th>Last Login</th>
+                            <th>Bookings</th>
+                            <th>Rating</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fundi in fundis %}
+                        <tr>
+                            <td>#{{ fundi.id }}</td>
+                            <td>{{ fundi.user.username }}</td>
+                            <td>{{ fundi.user.get_full_name|default:"-" }}</td>
+                            <td>{{ fundi.user.email }}</td>
+                            <td>{{ fundi.get_category_display }}</td>
+                            <td>{{ fundi.created_at|date:"M d, Y" }}</td>
+                            <td>{{ fundi.user.last_login|date:"M d, Y"|default:"Never" }}</td>
+                            <td>{{ fundi.total_bookings }}</td>
+                            <td>
+                                {% if fundi.avg_rating %}
+                                    {{ fundi.avg_rating|floatformat:1 }} <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                    No ratings
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-{% if fundi.is_available %}success{% else %}secondary{% endif %}">{% if fundi.is_available %}Available{% else %}Unavailable{% endif %}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="10" class="text-center">No fundis found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Registrations -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="bi bi-person-plus"></i> Recently Registered Fundis (Last 30 Days)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fundi in recent_registrations %}
+                        <tr>
+                            <td>{{ fundi.user.username }}</td>
+                            <td>{{ fundi.user.get_full_name|default:"-" }}</td>
+                            <td>{{ fundi.get_category_display }}</td>
+                            <td>{{ fundi.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'admin_fundi_detail' fundi.id %}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center">No recent registrations</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Logins -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="bi bi-box-arrow-in-right"></i> Recently Active Fundis (Last 30 Days)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fundi in recent_logins %}
+                        <tr>
+                            <td>{{ fundi.user.username }}</td>
+                            <td>{{ fundi.user.get_full_name|default:"-" }}</td>
+                            <td>{{ fundi.get_category_display }}</td>
+                            <td>{{ fundi.user.last_login|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'admin_fundi_detail' fundi.id %}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center">No recent logins</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

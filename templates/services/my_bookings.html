@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings - Fundi Platform{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">My Bookings</h1>
+    
+    {% if bookings %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Fundi</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Cost</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.service.name }}</td>
+                    <td>
+                        {% if user.is_fundi %}
+                            {{ booking.customer.get_full_name|default:booking.customer.username }}
+                        {% else %}
+                            {{ booking.fundi.user.get_full_name|default:booking.fundi.user.username }}
+                        {% endif %}
+                    </td>
+                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if booking.status == 'completed' %}bg-success
+                            {% elif booking.status == 'cancelled' %}bg-danger
+                            {% elif booking.status == 'in_progress' %}bg-warning
+                            {% elif booking.status == 'confirmed' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </td>
+                    <td>KSh {{ booking.total_cost }}</td>
+                    <td>
+                        <a href="{% url 'booking_detail' booking.id %}" class="btn btn-sm btn-primary">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        You have no bookings yet.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+
+
+
+

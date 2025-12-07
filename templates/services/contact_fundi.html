@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Contact {{ fundi.user.username }} - Fundi Platform{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">Contact Fundi</h2>
+                    <div class="mb-4">
+                        <h5>{{ fundi.user.get_full_name|default:fundi.user.username }}</h5>
+                        <p class="text-muted">{{ fundi.get_category_display }}</p>
+                        {% if fundi.user.phone_number %}
+                            <p><i class="bi bi-phone"></i> <a href="tel:{{ fundi.user.phone_number }}">{{ fundi.user.phone_number }}</a></p>
+                        {% endif %}
+                        {% if fundi.user.email %}
+                            <p><i class="bi bi-envelope"></i> <a href="mailto:{{ fundi.user.email }}">{{ fundi.user.email }}</a></p>
+                        {% endif %}
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Send Message</button>
+                        <a href="{% url 'fundi_detail' fundi.id %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+

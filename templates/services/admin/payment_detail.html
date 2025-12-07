@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - Payment Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-credit-card"></i> Payment #{{ payment.id }}</h1>
+        <a href="{% url 'admin_payments' %}" class="btn btn-outline-primary">Back to Payments</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th>Payment ID:</th>
+                            <td>#{{ payment.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount:</th>
+                            <td><strong>KSh {{ payment.amount }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td><span class="badge bg-{% if payment.status == 'completed' %}success{% elif payment.status == 'pending' %}warning{% elif payment.status == 'failed' %}danger{% else %}secondary{% endif %}">{{ payment.get_status_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Payment Method:</th>
+                            <td>{{ payment.get_payment_method_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Transaction ID:</th>
+                            <td>{{ payment.transaction_id|default:"-" }}</td>
+                        </tr>
+                        {% if payment.merchant_request_id %}
+                        <tr>
+                            <th>Merchant Request ID:</th>
+                            <td>{{ payment.merchant_request_id }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if payment.checkout_request_id %}
+                        <tr>
+                            <th>Checkout Request ID:</th>
+                            <td>{{ payment.checkout_request_id }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Created:</th>
+                            <td>{{ payment.created_at|date:"F d, Y H:i" }}</td>
+                        </tr>
+                        {% if payment.completed_at %}
+                        <tr>
+                            <th>Completed:</th>
+                            <td>{{ payment.completed_at|date:"F d, Y H:i" }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Related Booking</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th>Booking ID:</th>
+                            <td><a href="{% url 'admin_booking_detail' booking.id %}">#{{ booking.id }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td><a href="{% url 'admin_customer_detail' booking.customer.id %}">{{ booking.customer.username }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Fundi:</th>
+                            <td><a href="{% url 'admin_fundi_detail' booking.fundi.id %}">{{ booking.fundi.user.username }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Service:</th>
+                            <td>{{ booking.service.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Booking Status:</th>
+                            <td><span class="badge bg-{% if booking.status == 'completed' %}success{% elif booking.status == 'pending' %}warning{% elif booking.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ booking.get_status_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Booking Date:</th>
+                            <td>{{ booking.booking_date|date:"F d, Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Cost:</th>
+                            <td>KSh {{ booking.total_cost }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'admin_booking_detail' booking.id %}" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-calendar-check"></i> View Booking
+                    </a>
+                    <a href="{% url 'admin_customer_detail' booking.customer.id %}" class="btn btn-info w-100 mb-2">
+                        <i class="bi bi-person"></i> View Customer
+                    </a>
+                    <a href="{% url 'admin_fundi_detail' booking.fundi.id %}" class="btn btn-success w-100">
+                        <i class="bi bi-person-badge"></i> View Fundi
+                    </a>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>Payment Status</h5>
+                </div>
+                <div class="card-body">
+                    {% if payment.status == 'completed' %}
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <span>Payment completed successfully</span>
+                    </div>
+                    {% elif payment.status == 'pending' %}
+                    <div class="alert alert-warning">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-clock me-2"></i>
+                            <span>Payment is pending</span>
+                        </div>
+                        <hr class="my-2">
+                        <p class="mb-2">This payment is waiting for approval or M-Pesa callback.</p>
+                        <form method="post" action="{% url 'admin_approve_payment' payment.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-check-circle"></i> Approve Payment
+                            </button>
+                        </form>
+                    </div>
+                    {% elif payment.status == 'failed' %}
+                    <div class="alert alert-danger d-flex align-items-center">
+                        <i class="bi bi-x-circle me-2"></i>
+                        <span>Payment failed</span>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-secondary d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <span>Payment status: {{ payment.get_status_display }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Update Status Form -->
+                    <hr>
+                    <h6>Update Payment Status</h6>
+                    <form method="post" action="{% url 'admin_update_payment_status' payment.id %}">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <select name="status" class="form-select form-select-sm">
+                                {% for value, label in payment.STATUS_CHOICES %}
+                                <option value="{{ value }}" {% if payment.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-arrow-repeat"></i> Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

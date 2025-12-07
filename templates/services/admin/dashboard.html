@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Fundi Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 15s infinite ease-in-out;
+    }
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+    }
+    .stat-card.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        box-shadow: 0 10px 40px rgba(17, 153, 142, 0.3);
+    }
+    .stat-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        box-shadow: 0 10px 40px rgba(240, 147, 251, 0.3);
+    }
+    .stat-card.info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        box-shadow: 0 10px 40px rgba(79, 172, 254, 0.3);
+    }
+    .stat-card .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 15px 0;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+    }
+    .stat-card .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 1;
+    }
+    .admin-nav {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        transition: all 0.4s ease;
+    }
+    .admin-nav:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 50px rgba(102, 126, 234, 0.2);
+    }
+    .admin-nav a {
+        margin: 5px;
+        padding: 12px 24px;
+        border-radius: 12px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        font-weight: 600;
+    }
+    .admin-nav a:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    .activity-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        transition: all 0.4s ease;
+    }
+    .activity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(102, 126, 234, 0.2);
+    }
+    .activity-item {
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    .activity-item:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: translateX(5px);
+    }
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    .table {
+        font-size: 0.95rem;
+    }
+    .table th {
+        white-space: nowrap;
+        text-align: left;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    
+    /* Fix for Available/Unavailable badge alignment */
+    .table td .badge {
+        white-space: nowrap;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+        min-width: fit-content;
+        text-align: center;
+    }
+    
+    /* Specific styling for Recent Fundis table Status column */
+    .recent-fundis-table th:nth-child(4),
+    .recent-fundis-table td:nth-child(4) {
+        min-width: 180px !important;
+        width: 180px !important;
+        max-width: 180px !important;
+        white-space: nowrap !important;
+    }
+    
+    /* Ensure table-responsive doesn't cut off the Status column */
+    .activity-card .table-responsive {
+        overflow-x: visible;
+        min-width: 100%;
+    }
+    
+    /* Make sure the Recent Fundis table has enough space */
+    .recent-fundis-table {
+        min-width: 100%;
+        table-layout: auto;
+    }
+    
+    .recent-fundis-table th,
+    .recent-fundis-table td {
+        padding: 0.75rem;
+    }
+    
+    @media (max-width: 768px) {
+        .activity-card .table-responsive {
+            overflow-x: auto;
+        }
+    }
+    .stat-number {
+        position: relative;
+    }
+    .count-up {
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Count-up animation function
+    function animateCountUp(element, target, duration = 2000, prefix = '', suffix = '', isDecimal = false) {
+        const start = 0;
+        const increment = target / (duration / 16); // 60fps
+        let current = start;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            
+            if (isDecimal) {
+                element.textContent = prefix + current.toFixed(1) + suffix;
+            } else if (prefix.includes('KSh')) {
+                // For currency, format with commas
+                element.textContent = prefix + ' ' + Math.floor(current).toLocaleString() + suffix;
+            } else {
+                element.textContent = prefix + Math.floor(current) + suffix;
+            }
+        }, 16);
+    }
+    
+    // Initialize count-up animations when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for slide-in animations to complete
+        setTimeout(() => {
+            // Find all stat-number elements
+            const statNumbers = document.querySelectorAll('.stat-number');
+            
+            statNumbers.forEach((statNum, index) => {
+                const text = statNum.textContent.trim();
+                let target, prefix = '', suffix = '', isDecimal = false;
+                
+                // Check if it's a currency value (KSh)
+                if (text.includes('KSh')) {
+                    const match = text.match(/KSh\s*([\d,]+)/);
+                    if (match) {
+                        target = parseFloat(match[1].replace(/,/g, ''));
+                        prefix = 'KSh ';
+                        suffix = '';
+                    }
+                }
+                // Check if it's a decimal (rating)
+                else if (text.includes('.')) {
+                    target = parseFloat(text);
+                    isDecimal = true;
+                }
+                // Regular integer
+                else {
+                    target = parseInt(text.replace(/[^\d]/g, '')) || 0;
+                }
+                
+                // Store original text for prefix/suffix detection
+                const originalText = text;
+                if (!prefix && !isDecimal) {
+                    // Try to preserve any prefix/suffix
+                    const numMatch = originalText.match(/(\D*)(\d+)(\D*)/);
+                    if (numMatch) {
+                        prefix = numMatch[1] || '';
+                        suffix = numMatch[3] || '';
+                    }
+                }
+                
+                // Clear the element and start animation
+                statNum.textContent = prefix + (isDecimal ? '0.0' : '0') + suffix;
+                
+                // Start count-up with delay for stagger effect
+                setTimeout(() => {
+                    animateCountUp(statNum, target, 2000, prefix, suffix, isDecimal);
+                }, 300 + (index * 100));
+            });
+        }, 800); // Wait for slide animations
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Site</a>
+    </div>
+
+    <!-- Admin Navigation -->
+    <div class="admin-nav">
+        <h5 class="mb-3">Quick Navigation</h5>
+        <a href="{% url 'admin_bookings' %}" class="btn btn-primary"><i class="bi bi-calendar-check"></i> All Bookings</a>
+        <a href="{% url 'admin_payments' %}" class="btn btn-warning"><i class="bi bi-credit-card"></i> All Payments</a>
+        <a href="{% url 'admin_fundis' %}" class="btn btn-success"><i class="bi bi-people"></i> All Fundis</a>
+        <a href="{% url 'admin_customers' %}" class="btn btn-info"><i class="bi bi-person-circle"></i> All Customers</a>
+        <a href="{% url 'admin_fundi_activity' %}" class="btn btn-secondary"><i class="bi bi-activity"></i> Fundi Activity</a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-label">Total Bookings</div>
+                <div class="stat-number count-up">{{ total_bookings }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-label">Total Fundis</div>
+                <div class="stat-number count-up">{{ total_fundis }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card info">
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-number count-up">{{ total_customers }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-number count-up">{{ total_users }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-label">Pending Bookings</div>
+                <div class="stat-number count-up">{{ pending_bookings }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <div class="stat-label">Completed Bookings</div>
+                <div class="stat-number count-up">{{ completed_bookings }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card info">
+                <div class="stat-label">Active Fundis</div>
+                <div class="stat-number count-up">{{ active_fundis }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-number count-up">KSh {{ total_revenue|floatformat:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <div class="stat-card success">
+                <div class="stat-label">Completed Payments</div>
+                <div class="stat-number count-up">{{ completed_payments }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-label">Pending Payments</div>
+                <div class="stat-number count-up">{{ pending_payments }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div class="stat-label">Failed Payments</div>
+                <div class="stat-number count-up">{{ failed_payments }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="activity-card">
+                <h5><i class="bi bi-calendar-event"></i> Recent Bookings</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Fundi</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings %}
+                            <tr>
+                                <td>{{ booking.customer.username }}</td>
+                                <td>{{ booking.fundi.user.username }}</td>
+                                <td>{{ booking.service.name }}</td>
+                                <td><span class="badge bg-{% if booking.status == 'completed' %}success{% elif booking.status == 'pending' %}warning{% else %}info{% endif %}">{{ booking.get_status_display }}</span></td>
+                                <td>{{ booking.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center">No recent bookings</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{% url 'admin_bookings' %}" class="btn btn-sm btn-primary">View All Bookings</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="activity-card">
+                <h5><i class="bi bi-people"></i> Recent Fundis</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover recent-fundis-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Category</th>
+                                <th>Rate</th>
+                                <th style="min-width: 180px !important; width: 180px !important; max-width: 180px !important;">Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fundi in recent_fundis %}
+                            <tr>
+                                <td>{{ fundi.user.username }}</td>
+                                <td>{{ fundi.get_category_display }}</td>
+                                <td>KSh {{ fundi.hourly_rate }}</td>
+                                <td style="min-width: 180px !important; width: 180px !important; max-width: 180px !important; white-space: nowrap !important;">
+                                    <span class="badge bg-{% if fundi.is_available %}success{% else %}secondary{% endif %}" style="white-space: nowrap !important; padding: 0.5rem 0.75rem; font-size: 0.85rem; display: inline-block; width: 100%;">
+                                        {% if fundi.is_available %}
+                                            <i class="bi bi-check-circle"></i> Available
+                                        {% else %}
+                                            <i class="bi bi-x-circle"></i> Unavailable
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ fundi.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center">No fundis registered</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{% url 'admin_fundis' %}" class="btn btn-sm btn-success">View All Fundis</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="activity-card">
+                <h5><i class="bi bi-person-plus"></i> Recent User Registrations</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Joined</th>
+                                <th>Last Login</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.get_full_name|default:"-" }}</td>
+                                <td><span class="badge bg-{% if user.is_fundi %}success{% else %}info{% endif %}">{% if user.is_fundi %}Fundi{% else %}Customer{% endif %}</span></td>
+                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                <td>{{ user.last_login|date:"M d, Y"|default:"Never" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center">No users registered</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,46 @@
+═══════════════════════════════════════════════════════════
+  QUICK NGROK SETUP - EASIEST METHOD (No PATH needed!)
+═══════════════════════════════════════════════════════════
+
+STEP 1: Download ngrok
+  → Go to: https://ngrok.com/download
+  → Click "Download for Windows"
+  → Save the ZIP file
+
+STEP 2: Extract
+  → Right-click the ZIP → "Extract All"
+  → You'll see ngrok.exe
+
+STEP 3: Copy to System32 (EASIEST - No PATH setup!)
+  → Right-click ngrok.exe → "Copy"
+  → Press Win + R
+  → Type: C:\Windows\System32
+  → Press Enter
+  → Right-click in folder → "Paste"
+  → Click "Continue" if asked for permission
+
+STEP 4: Test
+  → Open a NEW CMD window (important!)
+  → Type: ngrok version
+  → Should show version number ✓
+
+STEP 5: Configure authtoken
+  → ngrok config add-authtoken 36K1KGsmdbEEEVVfJpOqT0nl9ZI_ouBpvBPPWB7WK6ragohc
+
+STEP 6: Start ngrok
+  → ngrok http 8000
+  → Copy the HTTPS URL (e.g., https://abc123.ngrok.io)
+
+STEP 7: Update .env file
+  → Open .env in your project
+  → Change MPESA_CALLBACK_URL to:
+  → MPESA_CALLBACK_URL=https://abc123.ngrok.io/mpesa/callback/
+  → (Replace abc123.ngrok.io with your actual ngrok URL)
+
+STEP 8: Restart Django
+  → Stop server (Ctrl+C)
+  → python manage.py runserver
+  → Try payment again!
+
+═══════════════════════════════════════════════════════════
+

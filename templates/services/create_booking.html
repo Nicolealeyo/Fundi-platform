@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Service - Fundi Platform{% endblock %}
+
+{% block content %}
+<style>
+    .booking-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+        padding: 40px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Animated gradient background */
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    /* Floating animated shapes */
+    .booking-container::before,
+    .booking-container::after {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 20s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    .booking-container::before {
+        top: -250px;
+        left: -250px;
+        animation-delay: 0s;
+    }
+    
+    .booking-container::after {
+        bottom: -250px;
+        right: -250px;
+        animation-delay: 10s;
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.3;
+        }
+        25% {
+            transform: translate(50px, 50px) scale(1.1);
+            opacity: 0.5;
+        }
+        50% {
+            transform: translate(-30px, 80px) scale(0.9);
+            opacity: 0.4;
+        }
+        75% {
+            transform: translate(80px, -30px) scale(1.05);
+            opacity: 0.5;
+        }
+    }
+    
+    /* Additional floating particles */
+    .booking-container {
+        background-image: 
+            radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.2) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(102, 126, 234, 0.2) 0%, transparent 50%);
+        background-size: 100% 100%, 100% 100%, 100% 100%;
+        animation: gradientShift 15s ease infinite, particleMove 25s ease-in-out infinite;
+    }
+    
+    @keyframes particleMove {
+        0%, 100% {
+            background-position: 0% 0%, 100% 100%, 50% 50%;
+        }
+        33% {
+            background-position: 100% 50%, 0% 50%, 100% 0%;
+        }
+        66% {
+            background-position: 50% 100%, 50% 0%, 0% 100%;
+        }
+    }
+    
+    /* Shimmer effect overlay */
+    .booking-container::before {
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 25%,
+            transparent 75%,
+            rgba(255, 255, 255, 0.1) 100%
+        );
+        background-size: 200% 200%;
+        animation: shimmer 8s linear infinite;
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -200% -200%;
+        }
+        100% {
+            background-position: 200% 200%;
+        }
+    }
+    
+    .booking-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Glowing border effect */
+    .booking-card::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #667eea);
+        background-size: 400% 400%;
+        border-radius: 20px;
+        z-index: -1;
+        opacity: 0.6;
+        animation: borderGlow 3s ease infinite;
+    }
+    
+    @keyframes borderGlow {
+        0%, 100% {
+            background-position: 0% 50%;
+            opacity: 0.6;
+        }
+        50% {
+            background-position: 100% 50%;
+            opacity: 0.8;
+        }
+    }
+    
+    /* Animated background particles */
+    .bg-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: particleFloat 15s infinite ease-in-out;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+    
+    .particle:nth-child(1) {
+        left: 10%;
+        animation-delay: 0s;
+        animation-duration: 20s;
+    }
+    
+    .particle:nth-child(2) {
+        left: 30%;
+        animation-delay: 2s;
+        animation-duration: 18s;
+        width: 6px;
+        height: 6px;
+    }
+    
+    .particle:nth-child(3) {
+        left: 50%;
+        animation-delay: 4s;
+        animation-duration: 22s;
+        width: 3px;
+        height: 3px;
+    }
+    
+    .particle:nth-child(4) {
+        left: 70%;
+        animation-delay: 6s;
+        animation-duration: 19s;
+        width: 5px;
+        height: 5px;
+    }
+    
+    .particle:nth-child(5) {
+        left: 85%;
+        animation-delay: 8s;
+        animation-duration: 21s;
+        width: 4px;
+        height: 4px;
+    }
+    
+    .particle:nth-child(6) {
+        left: 20%;
+        animation-delay: 10s;
+        animation-duration: 17s;
+        width: 7px;
+        height: 7px;
+    }
+    
+    @keyframes particleFloat {
+        0% {
+            transform: translateY(100vh) translateX(0) scale(0);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100px) translateX(100px) scale(1);
+            opacity: 0;
+        }
+    }
+    
+    /* Ensure container content is above particles */
+    .booking-container > .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .booking-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background-size: 200% 200%;
+        animation: headerGradient 8s ease infinite;
+        color: white;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .booking-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shine 3s infinite;
+    }
+    
+    @keyframes headerGradient {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+    
+    @keyframes shine {
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
+    
+    .booking-header h2 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        animation: textGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes textGlow {
+        0% {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        100% {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+    }
+    
+    .fundi-info-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .fundi-info-card h5 {
+        margin: 0 0 10px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .fundi-info-card p {
+        margin: 0;
+        opacity: 0.95;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-group-modern {
+        margin-bottom: 25px;
+    }
+    
+    .form-label-modern {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+    }
+    
+    .form-label-modern i {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
+    .form-control-modern {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f7fafc;
+    }
+    
+    .form-control-modern:focus {
+        border-color: #667eea;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .form-control-modern::placeholder {
+        color: #a0aec0;
+    }
+    
+    .form-text-modern {
+        color: #718096;
+        font-size: 0.85rem;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .cost-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin: 30px 0;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .cost-display-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .cost-display-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 15px 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        width: 100%;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    
+    .form-section {
+        padding: 40px;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(248, 250, 252, 0.98) 50%,
+            rgba(255, 255, 255, 0.95) 100%);
+        position: relative;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 10% 20%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 90% 80%, rgba(118, 75, 162, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(240, 147, 251, 0.03) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+        animation: subtlePulse 8s ease-in-out infinite;
+    }
+    
+    @keyframes subtlePulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.8;
+        }
+    }
+    
+    .form-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(102, 126, 234, 0.3) 25%,
+            rgba(118, 75, 162, 0.3) 50%,
+            rgba(240, 147, 251, 0.3) 75%,
+            transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmerLine 3s linear infinite;
+        z-index: 0;
+    }
+    
+    @keyframes shimmerLine {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+    
+    .form-section > * {
+        position: relative;
+        z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .booking-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .cost-display-amount {
+            font-size: 2rem;
+        }
+        
+        .form-section {
+            padding: 20px;
+        }
+    }
+    
+    select.form-control-modern {
+        cursor: pointer;
+        font-weight: 500;
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    select.form-control-modern:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-1px);
+    }
+    
+    select.form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25),
+                    0 6px 20px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    textarea.form-control-modern {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
+
+<div class="booking-container">
+    <!-- Animated background particles -->
+    <div class="bg-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="booking-card">
+                    <div class="booking-header">
+                        <h2><i class="bi bi-calendar-check"></i> Book Your Service</h2>
+                    </div>
+                    
+                    <div class="form-section">
+                        <div class="fundi-info-card">
+                            <h5>
+                                <i class="bi bi-person-badge"></i>
+                                {{ fundi.user.get_full_name|default:fundi.user.username }}
+                            </h5>
+                            <p>
+                                <i class="bi bi-briefcase"></i>
+                                <span>{{ fundi.get_category_display }}</span>
+                                <span style="margin-left: 15px;">
+                                    <i class="bi bi-currency-exchange"></i>
+                                    KSh {{ fundi.hourly_rate }}/hour
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <form method="post" id="bookingForm">
+                            {% csrf_token %}
+                            {{ form.fundi }}
+                            
+                            <div class="form-group-modern">
+                                <label for="{{ form.service.id_for_label }}" class="form-label-modern">
+                                    <i class="bi bi-list-check"></i>
+                                    Select Service
+                                </label>
+                                {{ form.service }}
+                                <small class="form-text-modern">
+                                    <i class="bi bi-info-circle"></i>
+                                    Choose the service you need from the list above
+                                </small>
+                            </div>
+                            
+                            <div class="form-group-modern">
+                                <label for="{{ form.description.id_for_label }}" class="form-label-modern">
+                                    <i class="bi bi-card-text"></i>
+                                    Service Description
+                                </label>
+                                {{ form.description }}
+                                <small class="form-text-modern">
+                                    <i class="bi bi-info-circle"></i>
+                                    Describe what you need in detail
+                                </small>
+                            </div>
+                            
+                            <div class="form-group-modern">
+                                <label for="{{ form.address.id_for_label }}" class="form-label-modern">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Service Address
+                                </label>
+                                {{ form.address }}
+                                <small class="form-text-modern">
+                                    <i class="bi bi-info-circle"></i>
+                                    Where should the service be performed?
+                                </small>
+                            </div>
+                            
+                            <div class="form-group-modern">
+                                <label for="{{ form.booking_date.id_for_label }}" class="form-label-modern">
+                                    <i class="bi bi-clock"></i>
+                                    Preferred Date & Time
+                                </label>
+                                {{ form.booking_date }}
+                                <small class="form-text-modern">
+                                    <i class="bi bi-info-circle"></i>
+                                    When would you like the service to be performed?
+                                </small>
+                            </div>
+                            
+                            <div class="form-group-modern">
+                                <label for="{{ form.estimated_hours.id_for_label }}" class="form-label-modern">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Estimated Hours
+                                </label>
+                                {{ form.estimated_hours }}
+                                <small class="form-text-modern">
+                                    <i class="bi bi-info-circle"></i>
+                                    How many hours do you think this will take?
+                                </small>
+                            </div>
+                            
+                            <div class="cost-display">
+                                <div class="cost-display-label">Estimated Cost</div>
+                                <div class="cost-display-amount" id="estimated-cost">KSh 0.00</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-submit">
+                                <i class="bi bi-check-circle"></i> Submit Booking Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const hourlyRate = {{ fundi.hourly_rate }};
+    const hoursInput = document.getElementById('id_estimated_hours');
+    const costDisplay = document.getElementById('estimated-cost');
+    
+    function updateCost() {
+        const hours = parseInt(hoursInput.value) || 0;
+        const cost = hourlyRate * hours;
+        costDisplay.textContent = 'KSh ' + cost.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        
+        // Add animation
+        costDisplay.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            costDisplay.style.transform = 'scale(1)';
+        }, 200);
+    }
+    
+    hoursInput.addEventListener('input', updateCost);
+    hoursInput.addEventListener('change', updateCost);
+    updateCost();
+    
+    // Add smooth transitions
+    costDisplay.style.transition = 'transform 0.2s ease';
+</script>
+{% endblock %}
+
+
+
+
+
+

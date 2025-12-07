@@ -1,0 +1,895 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Details - Fundi Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Beautiful Status Update Select */
+    .status-update-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.875rem 3.5rem 0.875rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #2d3748;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+                    0 2px 4px rgba(0, 0, 0, 0.04),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23667eea' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.25rem center;
+        background-size: 1.3em 1.3em;
+    }
+    
+    .status-update-select:hover {
+        border-color: #667eea;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2),
+                    0 2px 8px rgba(102, 126, 234, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23764ba2' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.25rem center;
+        background-size: 1.3em 1.3em;
+    }
+    
+    .status-update-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25),
+                    0 8px 24px rgba(102, 126, 234, 0.25),
+                    0 4px 12px rgba(102, 126, 234, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 1);
+        transform: translateY(-3px);
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
+    
+    /* Beautiful Options Styling */
+    .status-update-select option {
+        padding: 1rem 1.25rem;
+        background: #ffffff;
+        color: #2d3748;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .status-update-select option:checked {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        font-weight: 600;
+    }
+    
+    /* Dark Mode Support */
+    [data-theme="dark"] .status-update-select {
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+                    0 2px 4px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    [data-theme="dark"] .status-update-select:hover {
+        border-color: #8b5cf6;
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4),
+                    0 2px 8px rgba(139, 92, 246, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%238b5cf6' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.25rem center;
+        background-size: 1.3em 1.3em;
+    }
+    
+    [data-theme="dark"] .status-update-select:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.3),
+                    0 8px 24px rgba(139, 92, 246, 0.5),
+                    0 4px 12px rgba(139, 92, 246, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-theme="dark"] .status-update-select option {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    [data-theme="dark"] .status-update-select option:checked {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        color: #ffffff;
+    }
+    
+    /* Beautiful Update Status Button */
+    .status-update-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #ffffff;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3),
+                    0 2px 4px rgba(102, 126, 234, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .status-update-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .status-update-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4),
+                    0 4px 8px rgba(102, 126, 234, 0.3);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    .status-update-btn:hover::before {
+        left: 100%;
+    }
+    
+    .status-update-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .status-update-btn i {
+        margin-right: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .status-update-btn:hover i {
+        transform: rotate(180deg);
+    }
+    
+    [data-theme="dark"] .status-update-btn {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4),
+                    0 2px 4px rgba(139, 92, 246, 0.3);
+    }
+    
+    [data-theme="dark"] .status-update-btn:hover {
+        background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5),
+                    0 4px 8px rgba(139, 92, 246, 0.4);
+    }
+    
+    /* Status Update Wrapper */
+    .status-update-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    
+    /* Hide native select completely */
+    .status-update-wrapper .status-update-select {
+        position: absolute !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        width: 0 !important;
+        z-index: -1 !important;
+        visibility: hidden !important;
+    }
+    
+    /* Status Update Display - Only show arrow, hide text */
+    .status-update-display {
+        appearance: none;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.875rem 1.25rem;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #2d3748;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+                    0 2px 4px rgba(0, 0, 0, 0.04),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 48px;
+    }
+    
+    /* Hide the status text completely */
+    .status-update-display-text {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+    }
+    
+    .status-update-display:hover {
+        border-color: #667eea;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2),
+                    0 2px 8px rgba(102, 126, 234, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    }
+    
+    .status-update-display.active {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25),
+                    0 8px 24px rgba(102, 126, 234, 0.25),
+                    0 4px 12px rgba(102, 126, 234, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 1);
+        transform: translateY(-3px);
+    }
+    
+    .status-update-arrow {
+        color: #667eea;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .status-update-display.active .status-update-arrow {
+        transform: rotate(180deg);
+    }
+    
+    .success-animation-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        min-height: 300px;
+    }
+    
+    .success-lottie {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 1rem;
+    }
+    
+    .success-message {
+        text-align: center;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Modern Status Dropdown Wrapper */
+    .status-select-wrapper {
+        position: relative;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .status-select-native {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        height: 0;
+        width: 0;
+    }
+    
+    /* Modern Status Display (the visible field) */
+    .status-select-display {
+        appearance: none;
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.875rem 3.5rem 0.875rem 1.25rem;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #2d3748;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+                    0 2px 4px rgba(0, 0, 0, 0.04),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .status-select-display:hover {
+        border-color: #667eea;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2),
+                    0 2px 8px rgba(102, 126, 234, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        background-color: #f8f9ff;
+    }
+    
+    .status-select-display.active {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25),
+                    0 8px 24px rgba(102, 126, 234, 0.25),
+                    0 4px 12px rgba(102, 126, 234, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 1);
+        transform: translateY(-3px);
+    }
+    
+    .status-arrow {
+        color: #667eea;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .status-select-display.active .status-arrow {
+        transform: rotate(180deg);
+    }
+    
+    /* Beautiful Dropdown Options Menu */
+    .status-select-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.1),
+                    0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-top: 8px;
+        max-height: 400px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        z-index: 1000;
+        opacity: 0;
+        display: none;
+        visibility: hidden;
+        transform: translateY(-10px) scale(0.95);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    
+    .status-select-dropdown.show {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) scale(1);
+    }
+    
+    .status-select-dropdown::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .status-select-dropdown::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    .status-select-dropdown::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+    
+    .status-select-dropdown::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    /* Beautiful Status Options */
+    .status-option {
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        background: transparent;
+        color: #2d3748;
+        font-weight: 500;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        position: relative;
+        margin: 2px 8px;
+        border-radius: 10px;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        min-height: 48px !important;
+    }
+    
+    .status-option:first-child {
+        margin-top: 8px;
+    }
+    
+    .status-option:last-child {
+        margin-bottom: 8px;
+    }
+    
+    .status-option:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    }
+    
+    .status-option.selected {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        transform: translateX(0);
+    }
+    
+    .status-option.selected .status-check {
+        color: #ffffff;
+        font-size: 1.1rem;
+    }
+    
+    .status-option:active {
+        transform: scale(0.98);
+    }
+    
+    .status-option-text {
+        flex: 1;
+    }
+    
+    /* Dark Mode Styling */
+    [data-theme="dark"] .status-select-display {
+        background-color: var(--bg-secondary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+                    0 2px 4px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    [data-theme="dark"] .status-select-display:hover {
+        border-color: #8b5cf6;
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4),
+                    0 2px 8px rgba(139, 92, 246, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        background-color: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] .status-select-display.active {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.3),
+                    0 8px 24px rgba(139, 92, 246, 0.5),
+                    0 4px 12px rgba(139, 92, 246, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-theme="dark"] .status-arrow {
+        color: #8b5cf6;
+    }
+    
+    [data-theme="dark"] .status-select-dropdown {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+                    0 4px 16px rgba(0, 0, 0, 0.3),
+                    0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-theme="dark"] .status-option {
+        color: var(--text-primary);
+    }
+    
+    [data-theme="dark"] .status-option:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+        color: #8b5cf6;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    }
+    
+    [data-theme="dark"] .status-option.selected {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+    
+    [data-theme="dark"] .status-select-dropdown::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] .status-select-dropdown::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    }
+    
+    /* Modern Styled Status Dropdown (fallback for native) */
+    #booking-status-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23667eea' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.25rem center;
+        background-size: 1.3em 1.3em;
+        padding-right: 3.5rem;
+        cursor: pointer;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.875rem 3.5rem 0.875rem 1.25rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+                    0 2px 4px rgba(0, 0, 0, 0.04),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #2d3748;
+        width: 100%;
+    }
+    
+    #booking-status-select:hover {
+        border-color: #667eea;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2),
+                    0 2px 8px rgba(102, 126, 234, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        background-color: #f8f9ff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23764ba2' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    }
+    
+    #booking-status-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25),
+                    0 8px 24px rgba(102, 126, 234, 0.25),
+                    0 4px 12px rgba(102, 126, 234, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 1);
+        transform: translateY(-3px);
+        background-color: #ffffff;
+    }
+    
+    /* Style the dropdown options */
+    #booking-status-select option {
+        padding: 1rem 1.25rem;
+        background-color: #ffffff;
+        color: #2d3748;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: none;
+        margin: 2px 0;
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        line-height: 1.6;
+    }
+    
+    #booking-status-select option:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+    }
+    
+    #booking-status-select option:checked {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        font-weight: 600;
+    }
+    
+    /* Dark mode styling */
+    [data-theme="dark"] #booking-status-select {
+        background-color: var(--bg-secondary);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%238b5cf6' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+                    0 2px 4px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+    [data-theme="dark"] #booking-status-select:hover {
+        border-color: #8b5cf6;
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4),
+                    0 2px 8px rgba(139, 92, 246, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        background-color: var(--bg-tertiary);
+    }
+    
+    [data-theme="dark"] #booking-status-select:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.3),
+                    0 8px 24px rgba(139, 92, 246, 0.5),
+                    0 4px 12px rgba(139, 92, 246, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-theme="dark"] #booking-status-select option {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    [data-theme="dark"] #booking-status-select option:checked {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    {% if booking.status == 'completed' and payment and payment.status == 'completed' %}
+    <!-- Success Animation Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
+                <div class="modal-body success-animation-container">
+                    <div id="successAnimation" class="success-lottie"></div>
+                    <div class="success-message">
+                        <h3 class="fw-bold text-success mb-3">Booking Confirmed!</h3>
+                        <p class="text-muted">Your booking has been successfully completed and payment received.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show success animation if booking is completed
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+            
+            // Load Lottie success animation
+            if (typeof lottie !== 'undefined') {
+                lottie.loadAnimation({
+                    container: document.getElementById('successAnimation'),
+                    renderer: 'svg',
+                    loop: false,
+                    autoplay: true,
+                    path: 'https://assets5.lottiefiles.com/packages/lf20_checkmark.json'
+                }).catch(() => {
+                    // Fallback to icon
+                    document.getElementById('successAnimation').innerHTML = '<i class="bi bi-check-circle-fill" style="font-size: 6rem; color: #10b981;"></i>';
+                });
+            } else {
+                document.getElementById('successAnimation').innerHTML = '<i class="bi bi-check-circle-fill" style="font-size: 6rem; color: #10b981; animation: pulse 1s ease-in-out;"></i>';
+            }
+        });
+    </script>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3>Booking Details</h3>
+                    <hr>
+                    <p><strong>Service:</strong> {{ booking.service.name }}</p>
+                    <p><strong>Fundi:</strong> {{ booking.fundi.user.get_full_name|default:booking.fundi.user.username }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge 
+                            {% if booking.status == 'completed' %}bg-success
+                            {% elif booking.status == 'cancelled' %}bg-danger
+                            {% elif booking.status == 'in_progress' %}bg-warning
+                            {% elif booking.status == 'confirmed' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Booking Date:</strong> {{ booking.booking_date|date:"F d, Y, g:i A" }}</p>
+                    <p><strong>Estimated Hours:</strong> {{ booking.estimated_hours }}</p>
+                    <p><strong>Total Cost:</strong> KSh {{ booking.total_cost }}</p>
+                    <p><strong>Description:</strong> {{ booking.description }}</p>
+                    <p><strong>Address:</strong> {{ booking.address }}</p>
+                    <p><strong>Created:</strong> {{ booking.created_at|date:"F d, Y, g:i A" }}</p>
+                </div>
+            </div>
+            
+            {% if booking.fundi.user == user %}
+            <div class="card">
+                <div class="card-header">
+                    <h5>Update Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'update_booking_status' booking.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select" data-no-custom-dropdown="true" id="booking-status-update-select">
+                                <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="in_progress" {% if booking.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+        
+        <div class="col-md-4">
+            {% if booking.customer == user and booking.status == 'completed' and not review %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Leave a Review</h5>
+                    <a href="{% url 'create_review' booking.id %}" class="btn btn-primary w-100">Write Review</a>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if payment %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Payment</h5>
+                    <p><strong>Amount:</strong> KSh {{ payment.amount }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
+                            {{ payment.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Method:</strong> {{ payment.get_payment_method_display }}</p>
+                    {% if payment.transaction_id %}
+                        <p><strong>Transaction ID:</strong> {{ payment.transaction_id }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif booking.customer == user and booking.status in 'confirmed,in_progress,completed' %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Make Payment</h5>
+                    <p>Total: KSh {{ booking.total_cost }}</p>
+                    {% if booking.status == 'completed' %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Work completed! Please make payment.
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'create_payment' booking.id %}" class="btn btn-success w-100">
+                        <i class="bi bi-credit-card"></i> Pay Now
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if review %}
+            <div class="card">
+                <div class="card-body">
+                    <h5>Your Review</h5>
+                    <div class="mb-2">
+                        <span class="rating-stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <p>{{ review.comment|default:"No comment provided." }}</p>
+                    <p class="text-muted"><small>{{ review.created_at|date:"F d, Y" }}</small></p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Prevent custom dropdown conversion immediately
+    (function() {
+        const statusSelect = document.querySelector('#booking-status-select');
+        if (statusSelect) {
+            statusSelect.setAttribute('data-no-custom-dropdown', 'true');
+            // Remove any existing custom wrapper
+            const customWrapper = statusSelect.closest('.custom-select-wrapper');
+            if (customWrapper) {
+                const parent = customWrapper.parentNode;
+                parent.insertBefore(statusSelect, customWrapper);
+                customWrapper.remove();
+            }
+        }
+    })();
+    
+    // Force status update select to show all options - remove custom wrapper and ensure native select
+    (function() {
+        function fixStatusSelect() {
+            const statusSelect = document.querySelector('#booking-status-update-select');
+            if (!statusSelect) {
+                setTimeout(fixStatusSelect, 100);
+                return;
+            }
+            
+            // Remove any custom wrapper immediately
+            const customWrapper = statusSelect.closest('.custom-select-wrapper');
+            if (customWrapper) {
+                const form = customWrapper.closest('form');
+                if (form) {
+                    const mb3 = form.querySelector('.mb-3');
+                    if (mb3) {
+                        mb3.appendChild(statusSelect);
+                    }
+                    // Remove custom display and dropdown
+                    const customDisplay = customWrapper.querySelector('.custom-select-display');
+                    const customDropdown = customWrapper.querySelector('.custom-select-dropdown');
+                    if (customDisplay) customDisplay.remove();
+                    if (customDropdown) customDropdown.remove();
+                    customWrapper.remove();
+                    console.log('Removed custom wrapper from status select');
+                }
+            }
+            
+            // Force native select to be visible and show all options
+            statusSelect.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; height: auto !important; width: 100% !important;';
+            statusSelect.removeAttribute('data-no-custom-dropdown');
+            statusSelect.setAttribute('data-no-custom-dropdown', 'true');
+            
+            // Verify all options are present
+            const options = statusSelect.options;
+            console.log('Status select has', options.length, 'options:');
+            for (let i = 0; i < options.length; i++) {
+                console.log('  Option', i + 1, ':', options[i].value, '-', options[i].textContent);
+                options[i].style.display = 'block';
+            }
+            
+            // Ensure select is not disabled
+            statusSelect.removeAttribute('disabled');
+            statusSelect.removeAttribute('readonly');
+        }
+        
+        // Run immediately and on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fixStatusSelect);
+        } else {
+            fixStatusSelect();
+        }
+        
+        // Also run after a delay to catch late-loading custom dropdowns
+        setTimeout(fixStatusSelect, 500);
+        setTimeout(fixStatusSelect, 1000);
+    })();
+    
+    // Ensure status select shows all options - remove custom wrapper if exists (like admin dashboard)
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.querySelector('#booking-status-update-select');
+        if (statusSelect) {
+            // Remove any custom wrapper
+            const customWrapper = statusSelect.closest('.custom-select-wrapper');
+            if (customWrapper) {
+                const form = customWrapper.closest('form');
+                if (form) {
+                    const select = customWrapper.querySelector('select');
+                    if (select) {
+                        form.querySelector('.mb-3').appendChild(select);
+                    }
+                    customWrapper.remove();
+                }
+            }
+            // Ensure select is visible and has all options
+            statusSelect.style.display = 'block';
+            statusSelect.style.visibility = 'visible';
+            statusSelect.style.opacity = '1';
+            console.log('Status select has', statusSelect.options.length, 'options');
+        }
+    });
+</script>
+{% endblock %}
+
