@@ -635,6 +635,9 @@
 
 {% block content %}
 <div class="container my-5">
+    {% if payment and payment.payment_method == 'mpesa' and payment.checkout_request_id and payment.status == 'pending' %}
+    <div id="mpesa-sync-flag" hidden></div>
+    {% endif %}
     {% if booking.status == 'completed' and payment and payment.status == 'completed' %}
     <!-- Success Animation Modal -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
@@ -749,6 +752,21 @@
                     <p><strong>Method:</strong> {{ payment.get_payment_method_display }}</p>
                     {% if payment.transaction_id %}
                         <p><strong>Transaction ID:</strong> {{ payment.transaction_id }}</p>
+                    {% endif %}
+                    {% if payment.payment_method == 'mpesa' and payment.checkout_request_id %}
+                        {% if payment.status == 'pending' %}
+                        <div class="alert alert-info mt-3 mb-0">
+                            <small>
+                                M-Pesa payment is being confirmed. This page auto-refreshes every 8 seconds until status updates.
+                            </small>
+                        </div>
+                        {% elif payment.status == 'failed' %}
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <small>
+                                If you already paid, <strong>refresh this page once</strong> — we re-check M-Pesa and correct the status when the transaction is confirmed.
+                            </small>
+                        </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -890,6 +908,13 @@
             console.log('Status select has', statusSelect.options.length, 'options');
         }
     });
+
+    // Auto-refresh booking page while M-Pesa payment is pending.
+    if (document.getElementById('mpesa-sync-flag')) {
+        setTimeout(function() {
+            window.location.reload();
+        }, 8000);
+    }
 </script>
 {% endblock %}
 

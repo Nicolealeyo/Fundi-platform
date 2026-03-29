@@ -64,3 +64,8 @@ If you still get errors:
 3. Verify the passkey matches the shortcode
 4. Check that your app has "Lipa na M-Pesa Online" product enabled
 
+
+
+
+
+

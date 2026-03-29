@@ -155,8 +155,7 @@ class PaymentForm(forms.ModelForm):
         label='M-Pesa Phone Number',
         help_text='Enter any M-Pesa registered phone number. Format: 254XXXXXXXXX or 07XXXXXXXX',
         widget=forms.TextInput(attrs={
-            'placeholder': '254712345678 or 0712345678',
-            'list': 'test-numbers'
+            'placeholder': 'e.g. 254712345678 or 0712345678'
         })
     )
     
@@ -169,9 +168,12 @@ class PaymentForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         booking = kwargs.pop('booking', None)
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if booking:
             self.booking = booking
+        if user and not self.is_bound and getattr(user, 'phone_number', None):
+            self.fields['phone_number'].initial = user.phone_number
     
     def clean(self):
         cleaned_data = super().clean()

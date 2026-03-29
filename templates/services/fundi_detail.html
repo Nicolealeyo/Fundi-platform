@@ -136,6 +136,104 @@
                     inset 0 1px 0 rgba(255, 255, 255, 1);
         transform: translateY(-3px);
     }
+    
+    /* Table alignment styles */
+    .table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        vertical-align: middle;
+        text-align: left;
+        font-weight: 600;
+        padding: 0.75rem;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+    }
+    
+    .table tbody td {
+        vertical-align: middle;
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ensure proper column alignment */
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        width: 25%;
+        min-width: 120px;
+    }
+    
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        width: 25%;
+        min-width: 120px;
+    }
+    
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        width: 20%;
+        min-width: 100px;
+        text-align: left;
+    }
+    
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        width: 30%;
+        min-width: 100px;
+        text-align: left;
+    }
+    
+    [data-theme="dark"] .table thead th {
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-theme="dark"] .table tbody td {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Consistent spacing for card sections */
+    .depth-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .depth-card .card-body h4,
+    .depth-card .card-body h5 {
+        margin-bottom: 1rem;
+    }
+    
+    .depth-card .card-body hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .depth-card .card-body p:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Ensure proper spacing between sections */
+    .depth-card + .depth-card {
+        margin-top: 1.5rem;
+    }
+    
+    /* Contact Information specific spacing */
+    .depth-card .card-body p {
+        margin-bottom: 0.75rem;
+    }
+    
+    .depth-card .card-body p:last-of-type {
+        margin-bottom: 0;
+    }
 </style>
 {% endblock %}
 
@@ -219,10 +317,10 @@
             </div>
             
             <!-- Contact Information -->
-            <div class="depth-card">
+            <div class="depth-card mt-4">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold"><i class="bi bi-telephone"></i> Contact Information</h5>
-                    <hr>
+                    <h5 class="card-title fw-bold mb-3"><i class="bi bi-telephone"></i> Contact Information</h5>
+                    <hr class="my-3">
                     {% if fundi.user.phone_number %}
                         <p><i class="bi bi-phone"></i> <strong>Phone:</strong> <a href="tel:{{ fundi.user.phone_number }}">{{ fundi.user.phone_number }}</a></p>
                     {% else %}
@@ -241,24 +339,24 @@
         <div class="col-md-8">
             <div class="depth-card mb-4">
                 <div class="card-body">
-                    <h4 class="fw-bold">About</h4>
-                    <p>{{ fundi.bio|default:"No bio available." }}</p>
+                    <h4 class="fw-bold mb-3">About</h4>
+                    <p class="mb-0">{{ fundi.bio|default:"No bio available." }}</p>
                 </div>
             </div>
             
             <!-- Recent Bookings -->
             <div class="depth-card mb-4">
                 <div class="card-body">
-                    <h4>Recent Bookings ({{ total_completed }} completed)</h4>
+                    <h4 class="mb-3">Recent Bookings ({{ total_completed }} completed)</h4>
                     {% if recent_bookings %}
                     <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>Customer</th>
-                                    <th>Service</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
+                                    <th scope="col">Customer</th>
+                                    <th scope="col">Service</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -289,10 +387,10 @@
             </div>
             
             <!-- Reviews Section -->
-            <div class="depth-card">
+            <div class="depth-card mb-4">
                 <div class="card-body">
-                    <h4 class="fw-bold">Reviews ({{ fundi.total_reviews }})</h4>
-                    <hr>
+                    <h4 class="fw-bold mb-3">Reviews ({{ fundi.total_reviews }})</h4>
+                    <hr class="my-3">
                     {% for review in reviews_page %}
                     <div class="border-bottom pb-3 mb-3">
                         <div class="d-flex justify-content-between mb-2">

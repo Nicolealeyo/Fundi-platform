@@ -83,3 +83,8 @@ DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
 ⚠️ **Support**: Have customer support ready
 ⚠️ **Backup**: Keep backups of all transaction data
 
+
+
+
+
+

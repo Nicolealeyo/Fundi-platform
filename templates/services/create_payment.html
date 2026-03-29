@@ -30,16 +30,10 @@
                         <div class="mb-3" id="phoneField" style="display: none;">
                             <label for="{{ form.phone_number.id_for_label }}" class="form-label">M-Pesa Phone Number</label>
                             {{ form.phone_number }}
-                            <datalist id="test-numbers">
-                                <option value="254708374149">
-                                <option value="254712345678">
-                                <option value="254700000000">
-                                <option value="254711111111">
-                            </datalist>
                             <small class="form-text text-muted">
                                 Enter your M-Pesa registered phone number<br>
                                 <strong>Format:</strong> 254XXXXXXXXX (e.g., 254712345678) or 07XXXXXXXX (will be converted automatically)<br>
-                                <em class="text-info">You can use any valid M-Pesa registered phone number</em>
+                                <em class="text-info">You can type any valid M-Pesa registered number (not fixed to one number).</em>
                             </small>
                         </div>
                         <button type="submit" class="btn btn-success w-100 mt-3">

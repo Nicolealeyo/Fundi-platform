@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: fundi-platform
+    env: python
+    plan: free
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn fundi_platform.wsgi:application"
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "fundi-platform.onrender.com"
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: "https://fundi-platform.onrender.com"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      # Optional: persistent uploads (pair with a Render Disk mounted at /var/data)
+      - key: DJANGO_MEDIA_ROOT
+        value: "/var/data/media"
+      # Recommended: use a managed Postgres DB and set DATABASE_URL via the Render dashboard
+      # - key: DATABASE_URL
+      #   sync: false
+

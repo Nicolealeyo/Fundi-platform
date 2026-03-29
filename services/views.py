@@ -14,7 +14,51 @@ from datetime import timedelta
 from urllib.parse import urlparse
 from .models import User, Fundi, Service, Booking, Review, Payment
 from .forms import CustomUserCreationForm, FundiProfileForm, BookingForm, ReviewForm, PaymentForm, ContactFundiForm
-from .mpesa_utils import initiate_stk_push
+from .mpesa_utils import initiate_stk_push, query_stk_status
+
+
+def _sync_mpesa_payment_with_stk_query(payment, booking):
+    """
+    Ask Daraja for final STK status. Fixes missed callbacks and recovers payments
+    wrongly marked failed (e.g. old bug or premature callback).
+    """
+    if (
+        payment.payment_method != 'mpesa'
+        or not payment.checkout_request_id
+        or payment.status not in ('pending', 'failed')
+    ):
+        return
+
+    try:
+        stk_status = query_stk_status(payment.checkout_request_id)
+        if not stk_status.get('success'):
+            return
+
+        result_code = str(stk_status.get('result_code', ''))
+        result_desc = stk_status.get('result_description', '')
+
+        if result_code == '0':
+            payment.status = 'completed'
+            if not payment.completed_at:
+                payment.completed_at = timezone.now()
+            if not payment.transaction_id:
+                payment.transaction_id = payment.checkout_request_id
+            payment.save(update_fields=['status', 'completed_at', 'transaction_id'])
+
+            if booking.status != 'completed':
+                booking.status = 'completed'
+                booking.save(update_fields=['status'])
+
+            booking.refresh_from_db()
+            payment.refresh_from_db()
+        elif payment.status == 'pending' and result_code:
+            # Do not auto-mark failed from query; log only for pending.
+            print(
+                f"STK Query non-success for payment #{payment.id}: "
+                f"ResultCode={result_code}, ResultDesc={result_desc}. Keeping pending."
+            )
+    except Exception as sync_error:
+        print(f"STK auto-sync error for payment #{payment.id}: {sync_error}")
 
 
 def home(request):
@@ -209,6 +253,8 @@ def booking_detail(request, booking_id):
     payment = None
     try:
         payment = booking.payment
+        # Auto-sync M-Pesa payments with Daraja (pending: missed callback; failed: false negative).
+        _sync_mpesa_payment_with_stk_query(payment, booking)
     except Payment.DoesNotExist:
         pass
     
@@ -279,7 +325,7 @@ def create_payment(request, booking_id):
         return redirect('booking_detail', booking_id=booking_id)
     
     if request.method == 'POST':
-        form = PaymentForm(request.POST, booking=booking)
+        form = PaymentForm(request.POST, booking=booking, user=request.user)
         if form.is_valid():
             payment = form.save(commit=False)
             payment.booking = booking
@@ -377,7 +423,7 @@ def create_payment(request, booking_id):
             
             return redirect('booking_detail', booking_id=booking_id)
     else:
-        form = PaymentForm(booking=booking)
+        form = PaymentForm(booking=booking, user=request.user)
     
     context = {
         'form': form,

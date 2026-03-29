@@ -28,7 +28,8 @@ def mpesa_callback(request):
         
         merchant_request_id = stk_callback.get('MerchantRequestID', '')
         checkout_request_id = stk_callback.get('CheckoutRequestID', '')
-        result_code = stk_callback.get('ResultCode', '')
+        # Daraja sends ResultCode as an integer in JSON; keep it consistent for comparisons.
+        result_code = stk_callback.get('ResultCode', None)
         result_description = stk_callback.get('ResultDesc', '')
         
         # Find the payment by checkout_request_id
@@ -51,7 +52,7 @@ def mpesa_callback(request):
         # ResultCode 0 = Success
         print(f"M-Pesa Callback - ResultCode: {result_code}, ResultDesc: {result_description}")
         
-        if result_code == 0:
+        if result_code == 0 or str(result_code) == '0':
             # Payment successful
             callback_metadata = stk_callback.get('CallbackMetadata', {})
             items = callback_metadata.get('Item', [])

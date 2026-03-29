@@ -12,9 +12,20 @@ def get_access_token():
     """
     Get M-Pesa OAuth access token
     """
-    consumer_key = settings.MPESA_CONSUMER_KEY
-    consumer_secret = settings.MPESA_CONSUMER_SECRET
-    api_base_url = settings.MPESA_API_URL
+    consumer_key = (settings.MPESA_CONSUMER_KEY or "").strip()
+    consumer_secret = (settings.MPESA_CONSUMER_SECRET or "").strip()
+    api_base_url = (settings.MPESA_API_URL or "").strip().rstrip("/")
+
+    # Fail fast for obvious misconfiguration so the UI shows the real issue.
+    if not consumer_key or not consumer_secret:
+        print("M-Pesa Access Token Error: MPESA_CONSUMER_KEY/MPESA_CONSUMER_SECRET is empty.")
+        return None
+    if consumer_key == "your_consumer_key_here" or consumer_secret == "your_consumer_secret_here":
+        print("M-Pesa Access Token Error: Placeholder M-Pesa credentials detected in settings/.env.")
+        return None
+    if not api_base_url.startswith("https://"):
+        print(f"M-Pesa Access Token Error: Invalid MPESA_API_URL '{api_base_url}'. Must start with https://")
+        return None
     
     # Safety check: Warn if using production API
     if 'api.safaricom.co.ke' in api_base_url and 'sandbox' not in api_base_url.lower():
@@ -24,7 +35,7 @@ def get_access_token():
         print(f"✓ Using M-Pesa Sandbox API (no real money): {api_base_url}")
     
     # M-Pesa API endpoint for OAuth
-    api_url = api_base_url + "/oauth/v1/generate?grant_type=client_credentials"
+    api_url = f"{api_base_url}/oauth/v1/generate?grant_type=client_credentials"
     
     # Create base64 encoded string
     credentials = f"{consumer_key}:{consumer_secret}"
@@ -39,7 +50,16 @@ def get_access_token():
         
         # Check if request was successful
         if response.status_code != 200:
-            print(f"M-Pesa Access Token Error - HTTP {response.status_code}: {response.text}")
+            body = response.text.strip() or "<empty response body>"
+            print(f"M-Pesa Access Token Error - HTTP {response.status_code}: {body}")
+            print(
+                "Token request context:",
+                {
+                    "api_url": api_url,
+                    "key_prefix": consumer_key[:6],
+                    "secret_length": len(consumer_secret),
+                }
+            )
             return None
         
         json_response = response.json()
@@ -125,14 +145,18 @@ def initiate_stk_push(phone_number, amount, account_reference, transaction_desc,
     # Format phone number
     formatted_phone = format_phone_number(phone_number)
     
-    # Verify we're using sandbox API
+    # Verify we're using sandbox API (block production only in DEBUG/dev)
     api_base_url = settings.MPESA_API_URL
     if 'api.safaricom.co.ke' in api_base_url and 'sandbox' not in api_base_url.lower():
-        return {
-            'success': False,
-            'error': 'PRODUCTION API detected! Real money will be charged. Please use sandbox credentials. Set MPESA_API_URL=https://sandbox.safaricom.co.ke',
-            'error_code': 'production_api_detected',
-        }
+        if getattr(settings, 'DEBUG', False):
+            return {
+                'success': False,
+                'error': 'PRODUCTION API detected but DEBUG=True. Refusing to send STK push in development. '
+                         'If you meant to test sandbox, set MPESA_API_URL=https://sandbox.safaricom.co.ke. '
+                         'If you meant production, deploy with DEBUG=False.',
+                'error_code': 'production_api_blocked_in_debug',
+            }
+        print("⚠️ PRODUCTION M-Pesa API detected (DEBUG=False). Real money may be charged.")
     
     # M-Pesa API endpoint for STK push
     api_url = api_base_url + "/mpesa/stkpush/v1/processrequest"
@@ -272,9 +296,14 @@ def query_stk_status(checkout_request_id):
     passkey = settings.MPESA_PASSKEY
     password_string = f"{shortcode}{passkey}{timestamp}"
     password = base64.b64encode(password_string.encode()).decode()
-    
+
+    try:
+        business_shortcode = int(shortcode) if isinstance(shortcode, str) else shortcode
+    except (ValueError, TypeError):
+        business_shortcode = shortcode
+
     payload = {
-        "BusinessShortCode": shortcode,
+        "BusinessShortCode": business_shortcode,
         "Password": password,
         "Timestamp": timestamp,
         "CheckoutRequestID": checkout_request_id
@@ -286,10 +315,22 @@ def query_stk_status(checkout_request_id):
     }
     
     try:
-        response = requests.post(api_url, json=payload, headers=headers)
-        response.raise_for_status()
+        response = requests.post(api_url, json=payload, headers=headers, timeout=30)
+        if response.status_code != 200:
+            return {
+                'success': False,
+                'error': f'HTTP {response.status_code}: {response.text[:500]}',
+            }
         json_response = response.json()
-        
+        api_rc = json_response.get('ResponseCode')
+        if str(api_rc) != '0':
+            return {
+                'success': False,
+                'error': json_response.get('ResponseDescription', 'STK query rejected'),
+                'response_code': api_rc,
+                'raw_response': json_response,
+            }
+
         return {
             'success': True,
             'response_code': json_response.get('ResponseCode'),
