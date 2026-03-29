@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: "bash build.sh"
-    startCommand: "gunicorn fundi_platform.wsgi:application"
+    startCommand: "gunicorn fundi_platform.wsgi:application --bind 0.0.0.0:$PORT"
     autoDeploy: true
     envVars:
       - key: DJANGO_DEBUG
@@ -15,9 +15,7 @@ services:
         value: "https://fundi-platform.onrender.com"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      # Optional: persistent uploads (pair with a Render Disk mounted at /var/data)
-      - key: DJANGO_MEDIA_ROOT
-        value: "/var/data/media"
+      # Optional: add DJANGO_MEDIA_ROOT if you attach a Render Disk (e.g. /var/data/media).
       # Recommended: use a managed Postgres DB and set DATABASE_URL via the Render dashboard
       # - key: DATABASE_URL
       #   sync: false

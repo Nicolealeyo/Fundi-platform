@@ -24,6 +24,17 @@ DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='', cast=lambda v: [h for h in v.split(',') if h]) or []
 CSRF_TRUSTED_ORIGINS = config('DJANGO_CSRF_TRUSTED_ORIGINS', default='', cast=lambda v: [h for h in v.split(',') if h]) or []
 
+# Render sets RENDER + RENDER_EXTERNAL_HOSTNAME; use them if env vars from render.yaml
+# are not visible during build (migrate/collectstatic would otherwise fail with DEBUG=False).
+if os.environ.get('RENDER') and not ALLOWED_HOSTS:
+    _rh = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
+    if _rh:
+        ALLOWED_HOSTS = [_rh]
+if os.environ.get('RENDER') and not CSRF_TRUSTED_ORIGINS:
+    _rh = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
+    if _rh:
+        CSRF_TRUSTED_ORIGINS = [f'https://{_rh}']
+
 
 # Application definition
 
@@ -132,8 +143,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Serve static files in production without needing Nginx
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Compressed (no manifest) avoids collectstatic failures from missing CSS URL references.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
