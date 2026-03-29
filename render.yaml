@@ -27,3 +27,8 @@ services:
 databases:
   - name: fundi-postgres
     plan: free
+
+# After Postgres works: one-time import via Dashboard env (not committed here):
+# RUN_SEED_IMPORT=true, SEED_FIXTURE_URL=<private direct link to local_export.json>
+# Optional: MEDIA_ZIP_URL=<zip of local media/> — see build.sh
+

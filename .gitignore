@@ -28,6 +28,9 @@ wheels/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+# One-off DB exports (contain password hashes)
+local_export.json
+*_export.json
 /media
 /staticfiles
 

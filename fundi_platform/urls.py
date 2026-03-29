@@ -2,9 +2,10 @@
 URL configuration for fundi_platform project.
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
 from services import views as services_views
 
 urlpatterns = [
@@ -36,6 +37,17 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # Render (and similar) has no nginx; WhiteNoise serves static, but user uploads need a route.
+    media_url = settings.MEDIA_URL.lstrip('/')
+    if media_url:
+        urlpatterns += [
+            re_path(
+                rf'^{media_url}(?P<path>.*)$',
+                serve,
+                {'document_root': settings.MEDIA_ROOT},
+            ),
+        ]
 
 
 
