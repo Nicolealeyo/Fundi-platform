@@ -7,6 +7,9 @@ services:
     startCommand: "gunicorn fundi_platform.wsgi:application --bind 0.0.0.0:$PORT"
     autoDeploy: true
     envVars:
+      # Pin Python: Django 4.2 LTS supports through 3.12; Render default may be 3.14+.
+      - key: PYTHON_VERSION
+        value: "3.12.2"
       - key: DJANGO_DEBUG
         value: "False"
       - key: DJANGO_ALLOWED_HOSTS
